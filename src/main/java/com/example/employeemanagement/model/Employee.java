@@ -8,6 +8,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 @Entity
 @Table(name = "employee")
 public class Employee {
@@ -16,8 +20,16 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name must not be empty")
+    @Size(
+        min = 2,
+        max = 100,
+        message = "Name must be between 2 and 100 characters"
+    )
     private String name;
 
+    @NotBlank(message = "Email must not be empty")
+    @Email(message = "Email is invalid")
     private String email;
 
     @ManyToOne
