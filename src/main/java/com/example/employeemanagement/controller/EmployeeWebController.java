@@ -4,6 +4,8 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +24,9 @@ import com.example.employeemanagement.repository.EmployeeRepository;
 @RequestMapping("/employees")
 public class EmployeeWebController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(EmployeeWebController.class);
+
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
 
@@ -36,8 +41,15 @@ public class EmployeeWebController {
     @GetMapping("/list")
     public String showEmployeeList(Model model) {
 
+        logger.debug("Loading employee list");
+
         List<Employee> employees =
                 employeeRepository.findAll();
+
+        logger.info(
+                "Loaded {} employees",
+                employees.size()
+        );
 
         model.addAttribute(
                 "employees",
@@ -50,11 +62,10 @@ public class EmployeeWebController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
 
-        Employee employee = new Employee();
+        logger.debug("Opening add employee form");
 
-        employee.setDepartment(
-                new Department()
-        );
+        Employee employee = new Employee();
+        employee.setDepartment(new Department());
 
         model.addAttribute(
                 "employee",
@@ -75,7 +86,19 @@ public class EmployeeWebController {
             BindingResult bindingResult,
             Model model) {
 
+        logger.info(
+                "Request to add employee: name={}, email={}",
+                employee.getName(),
+                employee.getEmail()
+        );
+
         if (bindingResult.hasErrors()) {
+
+            logger.warn(
+                    "Validation failed when adding employee: name={}, email={}",
+                    employee.getName(),
+                    employee.getEmail()
+            );
 
             model.addAttribute(
                     "departments",
@@ -87,6 +110,10 @@ public class EmployeeWebController {
 
         if (employee.getDepartment() == null
                 || employee.getDepartment().getId() == null) {
+
+            logger.warn(
+                    "Cannot add employee because department was not selected"
+            );
 
             model.addAttribute(
                     "departments",
@@ -111,6 +138,11 @@ public class EmployeeWebController {
 
         if (department == null) {
 
+            logger.warn(
+                    "Department not found with id={}",
+                    departmentId
+            );
+
             model.addAttribute(
                     "departments",
                     departmentRepository.findAll()
@@ -124,12 +156,15 @@ public class EmployeeWebController {
             return "employees/add";
         }
 
-        employee.setDepartment(
-                department
-        );
+        employee.setDepartment(department);
 
-        employeeRepository.save(
-                employee
+        Employee savedEmployee =
+                employeeRepository.save(employee);
+
+        logger.info(
+                "Employee added successfully: id={}, name={}",
+                savedEmployee.getId(),
+                savedEmployee.getName()
         );
 
         return "redirect:/employees/list";
@@ -141,6 +176,12 @@ public class EmployeeWebController {
             @RequestParam(required = false) String department,
             Model model) {
 
+        logger.debug(
+                "Searching employees: name={}, department={}",
+                name,
+                department
+        );
+
         List<Employee> employees;
 
         if (name != null
@@ -148,9 +189,13 @@ public class EmployeeWebController {
 
             employees =
                     employeeRepository
-                            .findByNameContainingIgnoreCase(
-                                    name
-                            );
+                            .findByNameContainingIgnoreCase(name);
+
+            logger.info(
+                    "Search by name='{}' returned {} employees",
+                    name,
+                    employees.size()
+            );
 
         } else if (department != null
                 && !department.isBlank()) {
@@ -161,10 +206,20 @@ public class EmployeeWebController {
                                     department
                             );
 
+            logger.info(
+                    "Search by department='{}' returned {} employees",
+                    department,
+                    employees.size()
+            );
+
         } else {
 
             employees =
                     employeeRepository.findAll();
+
+            logger.debug(
+                    "No search condition provided, returning all employees"
+            );
         }
 
         model.addAttribute(

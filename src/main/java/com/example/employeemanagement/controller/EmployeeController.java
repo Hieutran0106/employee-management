@@ -4,6 +4,8 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,9 @@ import com.example.employeemanagement.repository.EmployeeRepository;
 @RequestMapping("/employees")
 public class EmployeeController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(EmployeeController.class);
+
     private final EmployeeRepository employeeRepository;
 
     public EmployeeController(
@@ -31,29 +36,45 @@ public class EmployeeController {
         this.employeeRepository = employeeRepository;
     }
 
-    // Lấy toàn bộ nhân viên
     @GetMapping
     public List<Employee> getAllEmployees() {
+
+        logger.debug("REST API: get all employees");
+
         return employeeRepository.findAll();
     }
 
-    // Thêm nhân viên mới
     @PostMapping
     public ResponseEntity<Employee> createEmployee(
             @Valid @RequestBody Employee employee) {
 
+        logger.info(
+                "Creating employee through REST API: name={}, email={}",
+                employee.getName(),
+                employee.getEmail()
+        );
+
         Employee savedEmployee =
                 employeeRepository.save(employee);
+
+        logger.info(
+                "Employee created successfully: id={}",
+                savedEmployee.getId()
+        );
 
         return ResponseEntity
                 .status(201)
                 .body(savedEmployee);
     }
 
-    // Lấy nhân viên theo ID
     @GetMapping("/{id}")
     public Employee getEmployeeById(
             @PathVariable Long id) {
+
+        logger.debug(
+                "REST API: get employee with id={}",
+                id
+        );
 
         return employeeRepository
                 .findById(id)
@@ -61,56 +82,98 @@ public class EmployeeController {
                         new EmployeeNotFoundException(id));
     }
 
-    // Cập nhật nhân viên
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(
             @PathVariable Long id,
             @Valid @RequestBody Employee updatedEmployee) {
 
-        Employee employee = employeeRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new EmployeeNotFoundException(id));
+        logger.info(
+                "Updating employee with id={}",
+                id
+        );
 
-        employee.setName(updatedEmployee.getName());
-        employee.setEmail(updatedEmployee.getEmail());
-        employee.setDepartment(updatedEmployee.getDepartment());
+        Employee employee =
+                employeeRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new EmployeeNotFoundException(id));
+
+        employee.setName(
+                updatedEmployee.getName()
+        );
+
+        employee.setEmail(
+                updatedEmployee.getEmail()
+        );
+
+        employee.setDepartment(
+                updatedEmployee.getDepartment()
+        );
 
         Employee savedEmployee =
                 employeeRepository.save(employee);
 
+        logger.info(
+                "Employee updated successfully: id={}, name={}",
+                savedEmployee.getId(),
+                savedEmployee.getName()
+        );
+
         return ResponseEntity.ok(savedEmployee);
     }
 
-    // Xóa nhân viên
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(
             @PathVariable Long id) {
 
+        logger.info(
+                "Deleting employee with id={}",
+                id
+        );
+
         if (!employeeRepository.existsById(id)) {
+
+            logger.warn(
+                    "Cannot delete employee because id={} does not exist",
+                    id
+            );
+
             throw new EmployeeNotFoundException(id);
         }
 
         employeeRepository.deleteById(id);
+
+        logger.info(
+                "Employee deleted successfully: id={}",
+                id
+        );
 
         return ResponseEntity
                 .noContent()
                 .build();
     }
 
-    // Tìm nhân viên theo tên
     @GetMapping("/search")
     public List<Employee> searchEmployees(
             @RequestParam String name) {
+
+        logger.debug(
+                "REST API: search employee by name={}",
+                name
+        );
 
         return employeeRepository
                 .findByNameContainingIgnoreCase(name);
     }
 
-    // Tìm nhân viên theo phòng ban
     @GetMapping("/search-by-department")
     public List<Employee> searchByDepartment(
             @RequestParam String department) {
+
+        logger.debug(
+                "REST API: search employee by department={}",
+                department
+        );
 
         return employeeRepository
                 .findByDepartmentNameIgnoreCase(department);
