@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Employees</title>
+</head>
+
+<body>
+
+    <h1>Search Employees</h1>
+
+    <form
+        method="get"
+        th:action="@{/employees/search-page}">
+
+        <label>Name:</label>
+
+        <input
+            type="text"
+            name="name">
+
+        <button type="submit">
+            Search by Name
+        </button>
+
+    </form>
+
+    <br>
+
+    <form
+        method="get"
+        th:action="@{/employees/search-page}">
+
+        <label>Department:</label>
+
+        <input
+            type="text"
+            name="department">
+
+        <button type="submit">
+            Search by Department
+        </button>
+
+    </form>
+
+    <br>
+
+    <a th:href="@{/employees/list}">
+        Back to Employee List
+    </a>
+
+    <hr>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr th:each="employee : ${employees}">
+
+                <td th:text="${employee.id}">
+                </td>
+
+                <td th:text="${employee.name}">
+                </td>
+
+                <td th:text="${employee.email}">
+                </td>
+
+                <td
+                    th:text="${employee.department != null
+                        ? employee.department.name
+                        : 'N/A'}">
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Employee</title>
+</head>
+
+<body>
+
+    <h1>Add Employee</h1>
+
+    <form
+        th:action="@{/employees/add}"
+        th:object="${employee}"
+        method="post">
+
+        <div>
+            <label>Name:</label>
+
+            <input
+                type="text"
+                th:field="*{name}">
+
+            <div
+                th:if="${#fields.hasErrors('name')}"
+                th:errors="*{name}">
+            </div>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Email:</label>
+
+            <input
+                type="text"
+                th:field="*{email}">
+
+            <div
+                th:if="${#fields.hasErrors('email')}"
+                th:errors="*{email}">
+            </div>
+        </div>
+
+        <br>
+
+        <div>
+            <label>Department:</label>
+
+            <select th:field="*{department.id}">
+
+                <option value="">
+                    -- Select Department --
+                </option>
+
+                <option
+                    th:each="department : ${departments}"
+                    th:value="${department.id}"
+                    th:text="${department.name}">
+                </option>
+
+            </select>
+
+            <div
+                th:if="${departmentError != null}"
+                th:text="${departmentError}">
+            </div>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Add Employee
+        </button>
+
+    </form>
+
+    <br>
+
+    <a th:href="@{/employees/list}">
+        Back to Employee List
+    </a>
+
+</body>
+</html>
