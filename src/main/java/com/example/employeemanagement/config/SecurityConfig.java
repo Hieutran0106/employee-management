@@ -6,10 +6,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -17,7 +17,6 @@ public class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
@@ -26,8 +25,7 @@ public class SecurityConfig {
             AuthenticationConfiguration configuration)
             throws Exception {
 
-        return configuration
-                .getAuthenticationManager();
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
@@ -36,21 +34,15 @@ public class SecurityConfig {
         JwtGrantedAuthoritiesConverter authoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
 
-        authoritiesConverter
-                .setAuthoritiesClaimName(
-                        "role"
-                );
-
-        authoritiesConverter
-                .setAuthorityPrefix("");
+        authoritiesConverter.setAuthoritiesClaimName("role");
+        authoritiesConverter.setAuthorityPrefix("");
 
         JwtAuthenticationConverter converter =
                 new JwtAuthenticationConverter();
 
-        converter
-                .setJwtGrantedAuthoritiesConverter(
-                        authoritiesConverter
-                );
+        converter.setJwtGrantedAuthoritiesConverter(
+                authoritiesConverter
+        );
 
         return converter;
     }
@@ -69,6 +61,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->
                     auth
 
+                        // Không cần đăng nhập
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
@@ -76,23 +69,28 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
+                        // USER và ADMIN đều được xem
                         .requestMatchers(
                                 "/employees",
                                 "/employees/list",
                                 "/employees/search",
                                 "/employees/search-by-department",
-                                "/employees/search-page"
+                                "/employees/search-page",
+                                "/employees/statistics",
+                                "/api/statistics/**"
                         )
                         .hasAnyRole(
                                 "USER",
                                 "ADMIN"
                         )
 
+                        // Các chức năng Employee còn lại chỉ ADMIN được dùng
                         .requestMatchers(
                                 "/employees/**"
                         )
                         .hasRole("ADMIN")
 
+                        // Những URL khác phải đăng nhập
                         .anyRequest()
                         .authenticated()
             )

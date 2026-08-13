@@ -20,6 +20,12 @@
         Search Employees
     </a>
 
+    &nbsp; | &nbsp;
+
+    <a th:href="@{/employees/statistics}">
+        Statistics
+    </a>
+
     <br>
     <br>
 
@@ -47,8 +53,7 @@
                 <td th:text="${employee.email}">
                 </td>
 
-                <td
-                    th:text="${employee.department != null
+                <td th:text="${employee.department != null
                         ? employee.department.name
                         : 'N/A'}">
                 </td>

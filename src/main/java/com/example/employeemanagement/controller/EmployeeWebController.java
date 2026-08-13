@@ -19,6 +19,7 @@ import com.example.employeemanagement.model.Department;
 import com.example.employeemanagement.model.Employee;
 import com.example.employeemanagement.repository.DepartmentRepository;
 import com.example.employeemanagement.repository.EmployeeRepository;
+import com.example.employeemanagement.service.EmployeeStatisticsService;
 
 @Controller
 @RequestMapping("/employees")
@@ -29,13 +30,16 @@ public class EmployeeWebController {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
+    private final EmployeeStatisticsService employeeStatisticsService;
 
     public EmployeeWebController(
             EmployeeRepository employeeRepository,
-            DepartmentRepository departmentRepository) {
+            DepartmentRepository departmentRepository,
+            EmployeeStatisticsService employeeStatisticsService) {
 
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
+        this.employeeStatisticsService = employeeStatisticsService;
     }
 
     @GetMapping("/list")
@@ -228,5 +232,33 @@ public class EmployeeWebController {
         );
 
         return "employees/search";
+    }
+
+    @GetMapping("/statistics")
+    public String showStatistics(Model model) {
+
+        logger.debug("Loading employee statistics page");
+
+        long totalEmployees =
+                employeeStatisticsService
+                        .getTotalEmployees();
+
+        model.addAttribute(
+                "totalEmployees",
+                totalEmployees
+        );
+
+        model.addAttribute(
+                "departmentStatistics",
+                employeeStatisticsService
+                        .getEmployeesByDepartment()
+        );
+
+        logger.info(
+                "Loaded employee statistics: totalEmployees={}",
+                totalEmployees
+        );
+
+        return "employees/statistics";
     }
 }
