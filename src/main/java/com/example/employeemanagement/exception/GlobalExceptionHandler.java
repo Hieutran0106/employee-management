@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmployeeNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleEmployeeNotFound(
-            EmployeeNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>>
+            handleEmployeeNotFound(
+                    EmployeeNotFoundException ex) {
 
-        Map<String, Object> error = new HashMap<>();
+        Map<String, Object> error =
+                new HashMap<>();
 
         error.put("status", 404);
         error.put("error", "Not Found");
@@ -28,11 +30,34 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
+    @ExceptionHandler(
+            UsernameAlreadyExistsException.class
+    )
+    public ResponseEntity<Map<String, Object>>
+            handleUsernameAlreadyExists(
+                    UsernameAlreadyExistsException ex) {
 
-        Map<String, String> errors = new HashMap<>();
+        Map<String, Object> error =
+                new HashMap<>();
+
+        error.put("status", 400);
+        error.put("error", "Bad Request");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .badRequest()
+                .body(error);
+    }
+
+    @ExceptionHandler(
+            MethodArgumentNotValidException.class
+    )
+    public ResponseEntity<Map<String, String>>
+            handleValidationErrors(
+                    MethodArgumentNotValidException ex) {
+
+        Map<String, String> errors =
+                new HashMap<>();
 
         ex.getBindingResult()
                 .getFieldErrors()
@@ -48,11 +73,15 @@ public class GlobalExceptionHandler {
                 .body(errors);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidJson(
-            HttpMessageNotReadableException ex) {
+    @ExceptionHandler(
+            HttpMessageNotReadableException.class
+    )
+    public ResponseEntity<Map<String, Object>>
+            handleInvalidJson(
+                    HttpMessageNotReadableException ex) {
 
-        Map<String, Object> error = new HashMap<>();
+        Map<String, Object> error =
+                new HashMap<>();
 
         error.put("status", 400);
         error.put("error", "Bad Request");
